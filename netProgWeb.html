@@ -18,17 +18,73 @@
 #container #chatTable tr td #typeBox form textarea {
 	width: 95%;
 }
+#container #chatTable {
+	visibility:hidden;
+}
 </style>
 <script>
+  var url = "";
+  var sock = null;
+  var uid = "";
+
   var log = function( s )
   {
 	//General Purpose Logging: push string into buffer
-	if( document.readyState !== 'complete' )
-	{
-		log.buffer.push(s);	
-	} 
+	log.buffer.push(s);	
   }
-  log.buffer = []
+  log.buffer = [];
+  
+  var handleLogin = function()
+  {
+	  //Login Reads the authentication info, validates, and connects to the chatserver
+	  console.log("TESTING LOGIN FUNCTIONALITY");
+	  
+	  var urlbox = document.getElementById("urlAuth");
+	  url = urlbox.value;
+	  var uidbox = document.getElementById("uidAuth");
+	  uid = uidbox.value;
+	  
+	  sock = new WebSocket(url);
+	  sock.onopen = function()
+  	  {
+	    // ON SOCKET OPEN: log connection establishment
+	    a = new Date();
+	    log("" + a.toLocaleString() + ": CONNECTION ESTABLISHED"); 
+		
+		sock.send("ME IS " + uid);
+	    document.getElementById("chatTable").style.visibility = "visible";
+	    document.getElementById("authenticationBox").style.visibility = "hidden";
+  	  }
+  
+  	  sock.onclose = function( e )
+      {
+	    a = new Date();
+	    log("" + a.toLocaleString() + ": CONNECTION TERMINATED");  
+      }
+  
+  	  sock.onerror = function( e )
+      {
+	    a = new Date();
+	    log("" + a.toLocaleString() + ": ERROR DETECTED: \n" + e.data.toString());
+      }
+  
+      sock.onmessage = function( e )
+      {
+	    a = new Date();
+	    msg = e.data.toString()
+	    log("" + a.toLocaleString() + ": MSG RECEIVED: \n" + msg);
+	    parseAndHandle( msg );
+      }
+	  
+	  //Ping the Server with a ME IS request
+
+  }
+  
+  var parseAndHandle = function( msg )
+  {
+	//Handler function for inputted messages 
+	
+  }
   
   if(this.MozWebSocket)
   {
@@ -44,8 +100,12 @@
   url = "ws://173.68.177.154:8787/chat";
   sock = new WebSocket( url );
   // TO SET: sock.onclose, sock.onerror, sock.onmessage, sock.onopen
-  
-
+ 
+  window.onload = function()
+  {
+	  
+	  
+  }
 
 </script>
 
@@ -59,6 +119,23 @@ Welcome to WillxWill chat client!
 <div id="container">
   <div id="authenticationBox" align="center">
     <p> AUTH GOES HERE </p>
+    <form id="authForm">
+    <table width="100%" border="1">
+  <tr>
+    <td>Please Enter the URL of the Chat Server:</td>
+    <td><input name="input" type="text" value="ws://173.68.177.154:8787/chat" size="35" maxlength="50" id="urlAuth" /></td>
+  </tr>
+  <tr>
+    <td>Please Select a User Name:</td>
+    <td><input name="" type="text" value="LadyGaga" size="35" maxlength="25" id="uidAuth" /></td>
+  </tr>
+  <tr>
+    <td colspan="2"><input name="Login" type="button" value="Log In" onclick="handleLogin()"/></td>
+  </tr>
+</table>
+
+      
+    </form>
   </div>
 
   <table width="100%" border="1" bordercolor="#000000" id="chatTable">
