@@ -19,6 +19,36 @@
 	width: 95%;
 }
 </style>
+<script>
+  var log = function( s )
+  {
+	//General Purpose Logging: push string into buffer
+	if( document.readyState !== 'complete' )
+	{
+		log.buffer.push(s);	
+	} 
+  }
+  log.buffer = []
+  
+  if(this.MozWebSocket)
+  {
+	WebSocket = MozWebSocket;  
+  }
+  
+  if(!window.WebSocket)
+  {
+	alert("WebSocket is not available in this browser. This chat client will not work");  
+  }
+  
+  //TODO: General Purpose Changes to URL
+  url = "ws://173.68.177.154:8787/chat";
+  sock = new WebSocket( url );
+  // TO SET: sock.onclose, sock.onerror, sock.onmessage, sock.onopen
+  
+
+
+</script>
+
 </head>
 <body>
 <div id="head" align="center">
