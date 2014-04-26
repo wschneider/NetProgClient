@@ -23,7 +23,7 @@
 	width: 95%;
 }
 #container #chatTable {
-	visibility:hidden;
+	display:none;
 }
 </style>
 <script>
@@ -56,8 +56,8 @@
 	    log("" + a.toLocaleString() + ": CONNECTION ESTABLISHED"); 
 		
 		sock.send("ME IS " + uid);
-	    document.getElementById("chatTable").style.visibility = "visible";
-	    document.getElementById("authenticationBox").style.visibility = "hidden";
+	    document.getElementById("chatTable").style.display = "table";
+	    document.getElementById("authenticationBox").style.display = "none";
 		document.getElementById("uidCont").textContent = "You are posting as: " +  uid;
   	  }
   
