@@ -29,7 +29,7 @@
 #chatTable 
 {
     width: 100%;
-    height: 90%;
+    height: 100%;
 }
 
 #chatTable td
@@ -195,6 +195,14 @@
 		
 	}
   }
+
+  var broadcast = function () {
+      //TO DO: generate and send broadcast message to server.
+      var messageText = document.getElementById("mainChatTextBox").value;
+      var fullMessage = "BROADCAST\n" + messageText;
+      sock.send(fullMessage);
+      alert(fullMessage);
+  }
   
   if(this.MozWebSocket)
   {
@@ -260,8 +268,8 @@
       <td height="20%"><div id="typeBox">
           <form action="" method="get">
             <input type="file" />
-            <textarea rows="5"></textarea>
-            <input name="Send Message" type="button" value="Send Message" />
+            <textarea id="mainChatTextBox" rows="5" cols = "50"></textarea>
+            <input name="Send Message" type="button" value="Send Message" onclick="broadcast()" />
           </form>
         </div></td>
     </tr>
