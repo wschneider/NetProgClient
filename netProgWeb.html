@@ -22,18 +22,156 @@
 #container #chatTable tr td #typeBox form textarea {
 	width: 95%;
 }
+#container #chatTable {
+	visibility:hidden;
+}
 </style>
+<script>
+  var url = "";
+  var sock = null;
+  var uid = "";
+
+  var log = function( s )
+  {
+	//General Purpose Logging: push string into buffer
+	log.buffer.push(s);	
+  }
+  log.buffer = [];
+  
+  var handleLogin = function()
+  {
+	  //Login Reads the authentication info, validates, and connects to the chatserver
+	  console.log("TESTING LOGIN FUNCTIONALITY");
+	  
+	  var urlbox = document.getElementById("urlAuth");
+	  url = urlbox.value;
+	  var uidbox = document.getElementById("uidAuth");
+	  uid = uidbox.value;
+	  
+	  sock = new WebSocket(url);
+	  sock.onopen = function()
+  	  {
+	    // ON SOCKET OPEN: log connection establishment
+	    a = new Date();
+	    log("" + a.toLocaleString() + ": CONNECTION ESTABLISHED"); 
+		
+		sock.send("ME IS " + uid);
+	    document.getElementById("chatTable").style.visibility = "visible";
+	    document.getElementById("authenticationBox").style.visibility = "hidden";
+		document.getElementById("uidCont").textContent = "You are posting as: " +  uid;
+  	  }
+  
+  	  sock.onclose = function( e )
+      {
+	    a = new Date();
+	    log("" + a.toLocaleString() + ": CONNECTION TERMINATED");  
+      }
+  
+  	  sock.onerror = function( e )
+      {
+	    a = new Date();
+	    log("" + a.toLocaleString() + ": ERROR DETECTED: \n" + e.data.toString());
+      }
+  
+      sock.onmessage = function( e )
+      {
+	    a = new Date();
+	    msg = e.data.toString()
+	    log("" + a.toLocaleString() + ": MSG RECEIVED: \n" + msg);
+	    parseAndHandle( msg );
+      }
+	  
+	  //Ping the Server with a ME IS request
+
+  }
+  
+  var parseAndHandle = function( msg )
+  {
+	//Handler function for inputted messages 
+	//Messages Received:
+	/*
+	  ME IS <fromusr>: 
+	    "OK"
+		"ERROR"
+	  WHO HERE <from-usr>: 
+	    "<usr1>,<usr2>,<usr3>\n"
+		"ERROR"
+	  SEND <from-usr> <to-usr>
+	    "PRIVATE FROM <from-usr>\n<CONTENTS>"
+		"ERROR"
+	  BROADCAST <from-usr>\n:
+	    "BROADCAST FROM <from-usr>\n<CONTENTS>"
+		"ERROR"
+	*/
+	// TO DO: Logic to determine which kind of message this is and how to properly handle
+  }
+  
+  var handleBroadcast = function( msg )
+  {
+	  /*
+	  	BROADCAST FIELD FORMAT EXAMPLE:
+			<p class="user_mario" onclick="privChat(mario)">&lt;mario:&gt;</p> <p> MESSAGE FROM MARIO </p>
+	  */
+	  
+  }
+  
+  var handlePrivate = function( msg )
+  {
+	// TO DO: check for existence of private chat box. Create it if it doesnt exist. 
+  }
+  
+  var handleWhoHere = function( msg )
+  {
+	//TO DO: parse user names, format properly, and place HTML into userbox  
+  }
+  
+  if(this.MozWebSocket)
+  {
+	WebSocket = MozWebSocket;  
+  }
+  
+  if(!window.WebSocket)
+  {
+	alert("WebSocket is not available in this browser. This chat client will not work");  
+  }
+  
+  //TODO: General Purpose Changes to URL
+  url = "ws://173.68.177.154:8787/chat";
+  sock = new WebSocket( url );
+  // TO SET: sock.onclose, sock.onerror, sock.onmessage, sock.onopen
+ 
+  window.onload = function()
+  {
+	  
+	  
+  }
+
+</script>
 </head>
 <body>
 <div id="head" align="center">
-<p>
-Welcome to WillxWill chat client!
-</p>
+  <p> Welcome to WillxWill chat client! </p>
 </div>
 <div id="container">
   <div id="authenticationBox" align="center">
     <p> AUTH GOES HERE </p>
+    <form id="authForm">
+      <table width="100%" border="1">
+        <tr>
+          <td>Please Enter the URL of the Chat Server:</td>
+          <td><input name="input" type="text" value="ws://173.68.177.154:8787/chat" size="35" maxlength="50" id="urlAuth" /></td>
+        </tr>
+        <tr>
+          <td>Please Select a User Name:</td>
+          <td><input name="" type="text" value="LadyGaga" size="35" maxlength="25" id="uidAuth" /></td>
+        </tr>
+        <tr>
+          <td colspan="2"><input name="Login" type="button" value="Log In" onclick="handleLogin()"/></td>
+        </tr>
+      </table>
+    </form>
   </div>
+<<<<<<< HEAD
 
   <table width="100%" height = "90%" border="1" bordercolor="#000000" id="chatTable">
   <tr>
@@ -70,6 +208,42 @@ Welcome to WillxWill chat client!
 </table>
 
   
+=======
+  <table width="100%" border="1" bordercolor="#000000" id="chatTable">
+    <tr>
+      <th height="5%" colspan="2" scope="col"> <div id="chatHead">
+          <p> CHAT HEAD </p>
+          <table width="100%" border="0">
+            <tr>
+              <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+              <td id="uidCont">&nbsp;</td>
+              <td id="logoutCont" align="right">
+              	<input type="button" name="Logout" id="logout" value="Log Out" />
+              </td>
+            </tr>
+          </table>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <td width="75%" height="70%"><div id="messageBox"> </div></td>
+      <td width="25%" height="85%" rowspan="2"><div id="userBox">
+          <p> USERS BOX </p>
+        </div></td>
+    </tr>
+    <tr>
+      <td height="20%"><div id="typeBox">
+          <form action="" method="get">
+            <input type="file" />
+            <textarea rows="5"></textarea>
+            <input name="Send Message" type="button" value="Send Message" />
+          </form>
+        </div></td>
+    </tr>
+  </table>
+>>>>>>> b9af304c656b7afb52b5f358a84c17a08c2f56aa
 </div>
 </body>
 </html>
