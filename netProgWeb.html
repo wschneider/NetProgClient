@@ -44,6 +44,7 @@
   {
 	//General Purpose Logging: push string into buffer
 	log.buffer.push(s);	
+	console.log(s);
   }
   log.buffer = [];
   
@@ -67,7 +68,9 @@
 		sock.send("ME IS " + uid);
 	    document.getElementById("chatTable").style.display = "table";
 	    document.getElementById("authenticationBox").style.display = "none";
-		document.getElementById("uidCont").textContent = "You are posting as: " +  uid;
+		var a = document.createTextNode("You are posting as: " + uid);
+		document.getElementById("uidCont").innerHTML = "";
+		document.getElementById("uidCont").appendChild(a);
   	  }
   
   	  sock.onclose = function( e )
@@ -79,7 +82,7 @@
   	  sock.onerror = function( e )
       {
 	    a = new Date();
-	    log("" + a.toLocaleString() + ": ERROR DETECTED: \n" + e.data.toString());
+	    log("" + a.toLocaleString() + ": ERROR DETECTED: \n" + e.toString());
       }
   
       sock.onmessage = function( e )
@@ -123,7 +126,7 @@
 	  handlePrivateIN(msg);	
 	  return;
 	}
-	if(msg == "OK")
+	if(msg.search("OK") == 0)
 	{
 		// more logic?
 		return;
@@ -166,6 +169,19 @@
   var handleWhoHereIN = function( msg )
   {
 	//TO DO: parse user names, format properly, and place HTML into userbox  
+	names = msg.split(",");
+	ubox = document.getElementById("userBox");
+	ubox.innerHTML = "";
+	for(var i = 0; i < names.length; i += 1)
+	{
+		var newp = document.createElement("p");
+		var newc = document.createTextNode(names[i]);
+		newp.appendChild(newc);
+		// FIX THIS FOR PRIVATE CHAT FUNCTIONALITY:
+		//newp.setAttribute("onclick", foo );
+		ubox.appendChild(newp);
+		
+	}
   }
   
   if(this.MozWebSocket)
@@ -217,7 +233,8 @@
   <table width="100%" height = "90%" border="1" bordercolor="#000000" id="chatTable">
     <tr>
       <th height="5%" colspan="2" scope="col"> <div id="chatHead">
-          <p> CHAT HEAD </p>
+          <p id="uidCont"> CHAT HEAD </p>
+          <input type="button" name="Logout" value="Log Out" onclick=("handleLogout()"/>
         </div>
       </th>
     </tr>
