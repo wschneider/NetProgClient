@@ -25,6 +25,15 @@
 #container #chatTable {
 	display:none;
 }
+#privBox #chat_mario {
+	
+}
+#privBox {
+	top: 1000px;
+	overflow: scroll;
+	position: relative;
+	bottom: 0px;
+}
 </style>
 <script>
   var url = "";
@@ -91,22 +100,47 @@
 	//Messages Received:
 	/*
 	  ME IS <fromusr>: 
-	    "OK"
-		"ERROR"
+	  3  "OK"
+	  4	"ERROR"
 	  WHO HERE <from-usr>: 
 	    "<usr1>,<usr2>,<usr3>\n"
-		"ERROR"
+	  4	"ERROR"
 	  SEND <from-usr> <to-usr>
-	    "PRIVATE FROM <from-usr>\n<CONTENTS>"
-		"ERROR"
+	  2  "PRIVATE FROM <from-usr>\n<CONTENTS>"
+	  4	"ERROR"
 	  BROADCAST <from-usr>\n:
-	    "BROADCAST FROM <from-usr>\n<CONTENTS>"
-		"ERROR"
+	  1  "BROADCAST FROM <from-usr>\n<CONTENTS>"
+	  4	"ERROR"
 	*/
 	// TO DO: Logic to determine which kind of message this is and how to properly handle
+	if(msg.search("BROADCAST FROM") == 0)
+	{
+	  handleBroadcastIN(msg);
+	  return;
+	}
+	if(msg.search("PRIVATE FROM") == 0)
+	{
+	  handlePrivateIN(msg);	
+	  return;
+	}
+	if(msg == "OK")
+	{
+		// more logic?
+		return;
+	}
+	if(msg.search("ERROR") == 0)
+	{
+		// more logic?
+		return;	
+	}
+	else
+	{
+	  handleWhoHereIN(msg);	
+	}
+	
   }
   
-  var handleBroadcast = function( msg )
+  var handleBroadcastIN = function( msg )
   {
 	  /*
 	  	BROADCAST FIELD FORMAT EXAMPLE:
@@ -115,12 +149,12 @@
 	  
   }
   
-  var handlePrivate = function( msg )
+  var handlePrivateIN = function( msg )
   {
 	// TO DO: check for existence of private chat box. Create it if it doesnt exist. 
   }
   
-  var handleWhoHere = function( msg )
+  var handleWhoHereIN = function( msg )
   {
 	//TO DO: parse user names, format properly, and place HTML into userbox  
   }
@@ -171,43 +205,52 @@
       </table>
     </form>
   </div>
-<<<<<<< HEAD
-
   <table width="100%" height = "90%" border="1" bordercolor="#000000" id="chatTable">
-  <tr>
-    <th height="5%" colspan="2" scope="col">
-      <div id="chatHead">
-        <p> CHAT HEAD </p>
-      </div>
-    </th>
-  </tr>
-  <tr>
-    <td width="75%">
-      <div id="messageBox">
-        
-        
-      </div>
-    </td>
-    <td width="25%" height="85%" rowspan="2">
-      <div id="userBox">
-        <p> USERS BOX </p>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td height="20%">
-      <div id="typeBox">
-        <form action="" method="get">
-          <input type="file" />
-          <textarea rows="5"></textarea>
-          <input name="Send Message" type="button" value="Send Message" />
+    <tr>
+      <th height="5%" colspan="2" scope="col"> <div id="chatHead">
+          <p> CHAT HEAD </p>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <td width="75%"><div id="messageBox"> </div></td>
+      <td width="25%" height="85%" rowspan="2"><div id="userBox">
+          <p> USERS BOX </p>
+        </div></td>
+    </tr>
+    <tr>
+      <td height="20%"><div id="typeBox">
+          <form action="" method="get">
+            <input type="file" />
+            <textarea rows="5"></textarea>
+            <input name="Send Message" type="button" value="Send Message" />
+          </form>
+        </div></td>
+    </tr>
+  </table>
+</div>
+<div id="privBox">
+  <div id="chat_mario">
+  <table width="10%" border="1">
+    <tr>
+      <td class="privHead">Private Chat with Mario</td>
+    </tr>
+    <tr>
+      <td class="privBody">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="privSend">
+      	<form>
+          <input name="PrivMsg" type="text" />
+          <input name="PrivSend" type="button" value="Send Message" />
         </form>
-      </div>
-    </td>
-  </tr>
-</table>
-
+      </td>
+    </tr>
+  </table>
+  
+  </div>
 
 </div>
+
 </body>
 </html>
