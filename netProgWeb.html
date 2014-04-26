@@ -103,7 +103,7 @@
 	  3  "OK"
 	  4	"ERROR"
 	  WHO HERE <from-usr>: 
-	    "<usr1>,<usr2>,<usr3>\n"
+	  5 "<usr1>,<usr2>,<usr3>\n"
 	  4	"ERROR"
 	  SEND <from-usr> <to-usr>
 	  2  "PRIVATE FROM <from-usr>\n<CONTENTS>"
@@ -136,6 +136,7 @@
 	else
 	{
 	  handleWhoHereIN(msg);	
+	  return;
 	}
 	
   }
@@ -152,6 +153,14 @@
   var handlePrivateIN = function( msg )
   {
 	// TO DO: check for existence of private chat box. Create it if it doesnt exist. 
+	//"PRIVATE FROM <from-usr>\n<CONTENTS>"
+	lines   = msg.split("\n");
+	first   = lines[0];
+	fromuid = first.split(" ")[2];
+	restmsg = msg.substring(first.length+1,msg.length-1);
+	
+	
+	
   }
   
   var handleWhoHereIN = function( msg )
