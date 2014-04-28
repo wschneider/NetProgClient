@@ -51,6 +51,12 @@
   var url = "";
   var sock = null;
   var uid = "";
+  var mainChatContents = "";
+  var userChatContents = new Object(); // Format: userChatContents[username] = [html contents of chat div]
+  var activeChat = "";                 // Empty string for main chat
+  userChatContents["SampleUser1"] = "Sample user 1 chat text";
+  userChatContents["SampleUser2"] = "Sample user 2 chat text";
+  userChatContents["SampleUser3"] = "Sample user 3 chat text";
 
   var log = function( s )
   {
@@ -196,12 +202,31 @@
 	}
   }
 
-  var broadcast = function () {
+  var sendMessage = function () {
       //TO DO: generate and send broadcast message to server.
       var messageText = document.getElementById("mainChatTextBox").value;
-      var fullMessage = "BROADCAST\n" + messageText;
+      var fullMessage;
+      if (activeChat == "") {
+          fullMessage = "BROADCAST\n" + messageText;
+      }
+      else {
+          fullMessage = "SEND " + activeChat + "\n" + messageText;
+      }
       sock.send(fullMessage);
       alert(fullMessage);
+  }
+
+  var switchChatContext = function (user) {
+      // TO DO: remove alert notifications from user list!
+      if (user === undefined) {
+          document.getElementById("messageBox").innerHTML = mainChatContents;
+          return;
+      }
+      if (userChatContents[user] === undefined) {
+          userChatContents[user] = "";
+      }
+      document.getElementById("messageBox").innerHTML = userChatContents[user];
+
   }
   
   if(this.MozWebSocket)
@@ -261,6 +286,10 @@
     <tr>
       <td width="75%"><div id="messageBox"> </div></td>
       <td width="25%" height="85%" rowspan="2"><div id="userBox">
+          <p class="mainChatLink" onclick="switchChatContext()">Main Chat</p>
+          <p class="userColor1" onclick="switchChatContext(&quot;SampleUser1&quot;)">SampleUser1</p>
+          <p class="userColor2" onclick="switchChatContext(&quot;SampleUser2&quot;)">SampleUser2</p>
+          <p class="userColor3" onclick="switchChatContext(&quot;SampleUser3&quot;)">SampleUser3</p>
           <p> USERS BOX </p>
         </div></td>
     </tr>
@@ -269,7 +298,7 @@
           <form action="" method="get">
             <input type="file" />
             <textarea id="mainChatTextBox" rows="5" cols = "50"></textarea>
-            <input name="Send Message" type="button" value="Send Message" onclick="broadcast()" />
+            <input name="Send Message" type="button" value="Send Message" onclick="sendMessage()" />
           </form>
         </div></td>
     </tr>
