@@ -46,17 +46,59 @@
 	position: relative;
 	bottom: 0px;
 }
+.userColor01
+{color: #006600;}
+.userColor02
+{color: #006699;}
+.userColor03
+{color: #0000CC;}
+.userColor04
+{color: #00FF00;}
+.userColor05
+{color: #33CCFF;}
+.userColor06
+{color: #666600;}
+.userColor07
+{color: #666666;}
+.userColor08
+{color: #660099;}
+.userColor09
+{color: #990000;}
+.userColor10
+{color: #9933FF;}
+.userColor11
+{color: #CC6600;}
+.userColor12
+{color: #CC6699;}
+.userColor13
+{color: #FF3333;}
+.userColor14
+{color: #FF00FF;}
+.userColor15
+{color: #FFCC00;}
+.userColor16
+{color: #99FF66;}
+
 </style>
 <script>
   var url = "";
   var sock = null;
   var uid = "";
   var mainChatContents = "";
-  var userChatContents = new Object(); // Format: userChatContents[username] = [html contents of chat div]
+  var users = new Object(); // Format: userChatContents[username] = [html contents of chat div]
   var activeChat = "";                 // Empty string for main chat
-  userChatContents["SampleUser1"] = "Sample user 1 chat text";
-  userChatContents["SampleUser2"] = "Sample user 2 chat text";
-  userChatContents["SampleUser3"] = "Sample user 3 chat text";
+  users["SampleUser1"] = { privateChatContents: "Sample user 1 chat text",
+                           colorClass: "userColor01"};
+  users["SampleUser2"] = { privateChatContents: "Sample user 2 chat text",
+                           colorClass: "userColor02"};
+  users["SampleUser3"] = { privateChatContents: "Sample user 3 chat text",
+                           colorClass: "userColor03"};
+  var userColorArray = ["userColor01", "userColor02", "userColor03",
+         "userColor04", "userColor05", "userColor06", "userColor07",
+         "userColor08", "userColor09", "userColor10", "userColor11",
+         "userColor12", "userColor13", "userColor14", "userColor15",
+         "userColor16"]
+  var nextColorIndex = 0;
 
   var log = function( s )
   {
@@ -161,14 +203,22 @@
 	}
 	
   }
-  
-  var handleBroadcastIN = function( msg )
-  {
-	  /*
-	  	BROADCAST FIELD FORMAT EXAMPLE:
-			<p class="user_mario" onclick="privChat(mario)">&lt;mario:&gt;</p> <p> MESSAGE FROM MARIO </p>
-	  */
-	  
+
+  var handleBroadcastIN = function (msg) {
+      /*
+      BROADCAST FIELD FORMAT EXAMPLE:
+      <p class="user_mario" onclick="privChat(mario)">&lt;mario:&gt;</p> <p> MESSAGE FROM MARIO </p>
+      */
+      if (activeChat == "") {
+          // The main broadcast chat is currently open. Do not add alert, just display in the chat div and add the message to the main chat string too.
+      }
+      else {
+          // The main broadcast chat is not currently open.
+          // First, add an alert to the user box.
+          mainChatLink = document.getElementById("mainChatLink");
+          userBox.innerHTML = "Main Chat (!)";
+          // TODO: Then add the message contents to the saved main chat.
+      }
   }
   
   var handlePrivateIN = function( msg )
@@ -183,27 +233,35 @@
 	
 	
   }
-  
-  var handleWhoHereIN = function( msg )
-  {
-	//TO DO: parse user names, format properly, and place HTML into userbox  
-	names = msg.split(",");
-	ubox = document.getElementById("userBox");
-	ubox.innerHTML = "";
-	for(var i = 0; i < names.length; i += 1)
-	{
-		var newp = document.createElement("p");
-		var newc = document.createTextNode(names[i]);
-		newp.appendChild(newc);
-		// FIX THIS FOR PRIVATE CHAT FUNCTIONALITY:
-		//newp.setAttribute("onclick", foo );
-		ubox.appendChild(newp);
-		
-	}
+
+  var handleWhoHereIN = function (msg) {
+      //TO DO: parse user names, format properly, and place HTML into userbox  
+      names = msg.split(",");
+      ubox = document.getElementById("userBox");
+      ubox.innerHTML = "";
+      newusers = new Object();
+      for (var i = 0; i < names.length; i += 1) {
+
+          if (users[names[i]] === undefined) {
+              newusers[names[i]] = { privateChatContents: "", userColorClass: userColorArray[nextColorIndex] };
+              nextColorIndex = (nextColorIndex + 1) % 16;
+          }
+          else {
+              newusers[names[i]] = users[names[i]];
+          }
+
+          var newp = document.createElement("p");
+          var newc = document.createTextNode(names[i]);
+          newp.appendChild(newc);
+          newp.className = newusers[names[i]].userColorClass;
+          newp.setAttribute("onclick", "switchChatContext(names[i])" );
+          ubox.appendChild(newp);
+
+      }
   }
 
   var sendMessage = function () {
-      //TO DO: generate and send broadcast message to server.
+      // generate and send broadcast and send messages to server.
       var messageText = document.getElementById("mainChatTextBox").value;
       var fullMessage;
       if (activeChat == "") {
@@ -211,9 +269,17 @@
       }
       else {
           fullMessage = "SEND " + activeChat + "\n" + messageText;
+          var chatdisplayline = "<p><span class=\"" + users[uid].colorClass +
+                  "\">" + uid + "</span>" + messageText + "</p>";
+          // Also adds the sent message to the visible chat display and the
+          // saved private chat memory. Not necessary for Broadcase because
+          // Broadcast sends to all users including self.
+          messageBox.innerHTML += chatdisplayline;
+          users[activeChat].privateChatContents += chatdisplayline;
       }
       sock.send(fullMessage);
-      alert(fullMessage);
+      // alert(fullMessage);
+      document.getElementById("mainChatTextBox").value = "";
   }
 
   var switchChatContext = function (user) {
@@ -222,10 +288,7 @@
           document.getElementById("messageBox").innerHTML = mainChatContents;
           return;
       }
-      if (userChatContents[user] === undefined) {
-          userChatContents[user] = "";
-      }
-      document.getElementById("messageBox").innerHTML = userChatContents[user];
+      document.getElementById("messageBox").innerHTML = users[user].privateChatContents;
 
   }
   
@@ -286,10 +349,10 @@
     <tr>
       <td width="75%"><div id="messageBox"> </div></td>
       <td width="25%" height="85%" rowspan="2"><div id="userBox">
-          <p class="mainChatLink" onclick="switchChatContext()">Main Chat</p>
-          <p class="userColor1" onclick="switchChatContext(&quot;SampleUser1&quot;)">SampleUser1</p>
-          <p class="userColor2" onclick="switchChatContext(&quot;SampleUser2&quot;)">SampleUser2</p>
-          <p class="userColor3" onclick="switchChatContext(&quot;SampleUser3&quot;)">SampleUser3</p>
+          <p class="mainChatLink" id="mainChatLink" onclick="switchChatContext()">Main Chat</p>
+          <p class="userColor01" onclick="switchChatContext(&quot;SampleUser1&quot;)">SampleUser1</p>
+          <p class="userColor02" onclick="switchChatContext(&quot;SampleUser2&quot;)">SampleUser2</p>
+          <p class="userColor03" onclick="switchChatContext(&quot;SampleUser3&quot;)">SampleUser3</p>
           <p> USERS BOX </p>
         </div></td>
     </tr>
