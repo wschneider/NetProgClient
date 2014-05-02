@@ -84,6 +84,7 @@
   var url = "";
   var sock = null;
   var uid = "";
+  var meisConfirmed = false;
   var mainChatContents = "";
   var users = new Object(); // Format: userChatContents[username] = [html contents of chat div]
   var activeChat = "";                 // Empty string for main chat
@@ -126,11 +127,7 @@
 	    log("" + a.toLocaleString() + ": CONNECTION ESTABLISHED"); 
 		
 		sock.send("ME IS " + uid);
-	    document.getElementById("chatTable").style.display = "table";
-	    document.getElementById("authenticationBox").style.display = "none";
-		var a = document.createTextNode("You are posting as: " + uid);
-		document.getElementById("uidCont").innerHTML = "";
-		document.getElementById("uidCont").appendChild(a);
+	    
   	  }
   
   	  sock.onclose = function( e )
@@ -156,52 +153,59 @@
 	  //Ping the Server with a ME IS request
 
   }
-  
-  var parseAndHandle = function( msg )
-  {
-	//Handler function for inputted messages 
-	//Messages Received:
-	/*
-	  ME IS <fromusr>: 
-	  3  "OK"
-	  4	"ERROR"
-	  WHO HERE <from-usr>: 
-	  5 "<usr1>,<usr2>,<usr3>\n"
-	  4	"ERROR"
-	  SEND <from-usr> <to-usr>
-	  2  "PRIVATE FROM <from-usr>\n<CONTENTS>"
-	  4	"ERROR"
-	  BROADCAST <from-usr>\n:
-	  1  "BROADCAST FROM <from-usr>\n<CONTENTS>"
-	  4	"ERROR"
-	*/
-	// TO DO: Logic to determine which kind of message this is and how to properly handle
-	if(msg.search("BROADCAST FROM") == 0)
-	{
-	  handleBroadcastIN(msg);
-	  return;
-	}
-	if(msg.search("PRIVATE FROM") == 0)
-	{
-	  handlePrivateIN(msg);	
-	  return;
-	}
-	if(msg.search("OK") == 0)
-	{
-		// more logic?
-		return;
-	}
-	if(msg.search("ERROR") == 0)
-	{
-		// more logic?
-		return;	
-	}
-	else
-	{
-	  handleWhoHereIN(msg);	
-	  return;
-	}
-	
+
+  var parseAndHandle = function (msg) {
+      //Handler function for inputted messages 
+      //Messages Received:
+      /*
+      ME IS <fromusr>: 
+      3  "OK"
+      4	"ERROR"
+      WHO HERE <from-usr>: 
+      5 "<usr1>,<usr2>,<usr3>\n"
+      4	"ERROR"
+      SEND <from-usr> <to-usr>
+      2  "PRIVATE FROM <from-usr>\n<CONTENTS>"
+      4	"ERROR"
+      BROADCAST <from-usr>\n:
+      1  "BROADCAST FROM <from-usr>\n<CONTENTS>"
+      4	"ERROR"
+      */
+      // TO DO: Logic to determine which kind of message this is and how to properly handle
+      if (msg.search("BROADCAST FROM") == 0) {
+          handleBroadcastIN(msg);
+          return;
+      }
+      if (msg.search("PRIVATE FROM") == 0) {
+          handlePrivateIN(msg);
+          return;
+      }
+      if (msg.search("OK") == 0) {
+          // more logic?
+          if (!meisConfirmed) {
+              // If the ME IS message hasn't received a response yet, then upon
+              // OK, set everything up. If it has, why would we recieve OK?
+              meisConfirmed = true;
+              document.getElementById("chatTable").style.display = "table";
+              document.getElementById("authenticationBox").style.display = "none";
+              var a = document.createTextNode("You are posting as: " + uid);
+              document.getElementById("uidCont").innerHTML = "";
+              document.getElementById("uidCont").appendChild(a);
+          }
+          return;
+      }
+      if (msg.search("ERROR") == 0) {
+          // more logic?
+          // For the moment, I think we're fine just alerting users.
+          // If the error is to a ME IS, the absence of OK will mean it won't go to chat.
+          alert(msg);
+          return;
+      }
+      else {
+          handleWhoHereIN(msg);
+          return;
+      }
+
   }
 
   var handleBroadcastIN = function (msg) {
