@@ -104,7 +104,7 @@
   var log = function( s )
   {
 	//General Purpose Logging: push string into buffer
-	log.buffer.push(s);	
+	log.buffer.push(s);
 	console.log(s);
   }
   log.buffer = [];
@@ -224,18 +224,28 @@
           // TODO: Then add the message contents to the saved main chat.
       }
   }
-  
-  var handlePrivateIN = function( msg )
-  {
-	// TO DO: check for existence of private chat box. Create it if it doesnt exist. 
-	//"PRIVATE FROM <from-usr>\n<CONTENTS>"
-	lines   = msg.split("\n");
-	first   = lines[0];
-	fromuid = first.split(" ")[2];
-	restmsg = msg.substring(first.length+1,msg.length-1);
-	
-	
-	
+
+  var handlePrivateIN = function (msg) {
+      // TO DO: check for existence of private chat box. Create it if it doesnt exist. 
+      //"PRIVATE FROM <from-usr>\n<CONTENTS>"
+      lines = msg.split("\n");
+      first = lines[0];
+      fromuid = first.split(" ")[2];
+      restmsg = msg.substring(first.length + 1, msg.length - 1);
+
+      var chatdisplayline = "<p><span class=\"" + users[fromuid].colorClass +
+              "\">" + fromuid + ": </span>" + restmsg + "</p>";
+      users[fromuid].privateChatContents += chatdisplayline;
+      if (activeChat == fromuid) {
+          document.getElementById("messageBox").innerHTML += chatdisplayline;
+      }
+      else {
+          // Add alert to fromuid in the users box if not already present.
+          userBox = document.getElementById("userBox");
+          if (userBox.innerHTML.search(fromuid + " (!)") < 0) {
+              userBox.innerHTML = userBox.innerHTML.replace(fromuid, fromuid + " (!)");
+          }
+      }
   }
 
   var handleWhoHereIN = function (msg) {
@@ -288,11 +298,14 @@
 
   var switchChatContext = function (user) {
       // TO DO: remove alert notifications from user list!
-      if (user === undefined) {
+      userBox = document.getElementById("userBox");
+      if (user === undefined || user == "") {
           document.getElementById("messageBox").innerHTML = mainChatContents;
+          userBox.innerHTML = userBox.innerHTML.replace("Main Chat (!)", "Main Chat");
           return;
       }
       document.getElementById("messageBox").innerHTML = users[user].privateChatContents;
+      userBox.innerHTML = userBox.innerHTML.replace(user + " (!)", user);
 
   }
   
