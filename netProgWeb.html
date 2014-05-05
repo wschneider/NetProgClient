@@ -25,20 +25,14 @@
 #container #chatTable {
 	display:none;
 }
-
-#chatTable 
-{
-    width: 100%;
-    height: 100%;
+#chatTable {
+	width: 100%;
+	height: 100%;
 }
-
-#chatTable td
-{
-    border: 1px solid black;
+#chatTable td {
+	border: 1px solid black;
 }
-
 #privBox #chat_mario {
-	
 }
 #privBox {
 	top: 1000px;
@@ -46,39 +40,58 @@
 	position: relative;
 	bottom: 0px;
 }
-.userColor01
-{color: #006600;}
-.userColor02
-{color: #006699;}
-.userColor03
-{color: #0000CC;}
-.userColor04
-{color: #00FF00;}
-.userColor05
-{color: #33CCFF;}
-.userColor06
-{color: #666600;}
-.userColor07
-{color: #666666;}
-.userColor08
-{color: #660099;}
-.userColor09
-{color: #990000;}
-.userColor10
-{color: #9933FF;}
-.userColor11
-{color: #CC6600;}
-.userColor12
-{color: #CC6699;}
-.userColor13
-{color: #FF3333;}
-.userColor14
-{color: #FF00FF;}
-.userColor15
-{color: #FFCC00;}
-.userColor16
-{color: #99FF66;}
-
+#messageBox {
+	height:100%;
+	overflow:scroll;
+}
+.userColor01 {
+	color: #006600;
+}
+.userColor02 {
+	color: #006699;
+}
+.userColor03 {
+	color: #0000CC;
+}
+.userColor04 {
+	color: #00FF00;
+}
+.userColor05 {
+	color: #33CCFF;
+}
+.userColor06 {
+	color: #666600;
+}
+.userColor07 {
+	color: #666666;
+}
+.userColor08 {
+	color: #660099;
+}
+.userColor09 {
+	color: #990000;
+}
+.userColor10 {
+	color: #9933FF;
+}
+.userColor11 {
+	color: #CC6600;
+}
+.userColor12 {
+	color: #CC6699;
+}
+.userColor13 {
+	color: #FF3333;
+}
+.userColor14 {
+	color: #FF00FF;
+}
+.userColor15 {
+	color: #FFCC00;
+}
+.userColor16 {
+	color: #99FF66;
+}
 </style>
 <script>
   var url = "";
@@ -86,15 +99,10 @@
   var uid = "";
   var meisConfirmed = false;
   var mainChatContents = "";
+  var notifications = [];
   
   var users = new Object(); // Format: userChatContents[username] = [html contents of chat div]
   var activeChat = "";                 // Empty string for main chat
-  users["SampleUser1"] = { privateChatContents: "Sample user 1 chat text",
-                           colorClass: "userColor01"};
-  users["SampleUser2"] = { privateChatContents: "Sample user 2 chat text",
-                           colorClass: "userColor02"};
-  users["SampleUser3"] = { privateChatContents: "Sample user 3 chat text",
-                           colorClass: "userColor03"};
   var userColorArray = ["userColor01", "userColor02", "userColor03",
          "userColor04", "userColor05", "userColor06", "userColor07",
          "userColor08", "userColor09", "userColor10", "userColor11",
@@ -199,6 +207,7 @@
               var a = document.createTextNode("You are posting as: " + uid);
               document.getElementById("uidCont").innerHTML = "";
               document.getElementById("uidCont").appendChild(a);
+			  document.getElementById("targetCont").innerHTML = "You are chatting with: Main Chat";
           }
           return;
       }
@@ -234,6 +243,8 @@
 			  
 	      mainChatContents += chatdisplayline;
 		  messageBox.innerHTML += chatdisplayline;
+		  var tmp = document.getElementById("messageBox");
+		  tmp.scrollTop = tmp.scrollHeight;
 			  
       }
       else {
@@ -246,6 +257,7 @@
               "\">" + fromuid + ": </span>" + restmsg + "</p>";
 			  
 		  mainChatContents += chatdisplayline;
+		  addNotification("main");
 		  
       }
   }
@@ -264,13 +276,11 @@
 	  
       if (activeChat == fromuid) {
 		  messageBox.innerHTML += chatdisplayline;
+		  document.getElementById("messageBox").scrollTop = document.getElementById("messageBox").scrollHeight;
       }
       else {
           // Add alert to fromuid in the users box if not already present.
-          userBox = document.getElementById("userBox");
-          if (userBox.innerHTML.search(fromuid + " (!)") < 0) {
-              //userBox.innerHTML = userBox.innerHTML.replace(fromuid, fromuid + " (!)");
-          }
+          addNotification(fromuid);
       }
   }
 
@@ -281,6 +291,15 @@
       ubox = document.getElementById("userBox");
       ubox.innerHTML = "";
       newusers = new Object();
+	  
+	  
+	  var newp = document.createElement("p");
+	  var newc = document.createTextNode("Main Chat");
+	  newp.appendChild(newc);
+	  newp.className = "mainChatLink";
+	  newp.setAttribute("onclick", "switchChatContext()");
+	  ubox.appendChild(newp);
+	  
       for (var i = 0; i < names.length; i += 1) {
 
           if (users[names[i]] === undefined) {
@@ -301,14 +320,34 @@
 
       }
 	  
-	  var newp = document.createElement("p");
-	  var newc = document.createTextNode("Main Chat");
-	  newp.appendChild(newc);
-	  newp.className = "mainChatLink";
-	  newp.setAttribute("onclick", "switchChatContext()");
-	  ubox.appendChild(newp);
-	  
 	  users = newusers;
+  }
+
+  var handleLogout = function() {
+	//Handle logout. Clear all boxes. Return to authentication. Ping server with logout
+	sock.send("LOGOUT " + uid);
+	document.getElementById("messageBox").innerHTML = "";
+	document.getElementById("userBox").innerHTML = "";
+	document.getElementById("mainChatTextBox").textContent = "";
+	document.getElementById("noteBox").innerHTML = "";
+	document.getElementById("uidCont").innerHTML = "";
+	
+	meisConfirmed = false;
+	document.getElementById("chatTable").style.display = "none";
+	document.getElementById("authenticationBox").style.display = "table";
+	
+	
+	/*
+	meisConfirmed = true;
+              document.getElementById("chatTable").style.display = "table";
+              document.getElementById("authenticationBox").style.display = "none";
+              var a = document.createTextNode("You are posting as: " + uid);
+              document.getElementById("uidCont").innerHTML = "";
+              document.getElementById("uidCont").appendChild(a);
+	
+	*/
+	  
+	  
   }
 
   var sendMessage = function () {
@@ -344,13 +383,78 @@
       if (user === undefined || user == "") {
           document.getElementById("messageBox").innerHTML = mainChatContents;
           //userBox.innerHTML = userBox.innerHTML.replace("Main Chat (!)", "Main Chat");
+		  document.getElementById("targetCont").innerHTML = "You are chatting with: Main Chat";
+		  removeNotification("main");
+		  activeChat = "";
           return;
       }
       document.getElementById("messageBox").innerHTML = users[user].privateChatContents;
       //userBox.innerHTML = userBox.innerHTML.replace(user + " (!)", user);
-	  alert("chatting with" + user);
+	  //alert("chatting with " + user);
+	  /*meisConfirmed = true;
+              document.getElementById("chatTable").style.display = "table";
+              document.getElementById("authenticationBox").style.display = "none";
+              var a = document.createTextNode("You are posting as: " + uid);
+              document.getElementById("uidCont").innerHTML = "";
+              document.getElementById("uidCont").appendChild(a);*/
+	  document.getElementById("targetCont").innerHTML = "You are chatting with: " + user;
+	  
 	  activeChat = user;
+	  removeNotification(user);
 
+  }
+  
+  var addNotification = function (user) {
+	  for(var i = 0;i< notifications.length;i++)
+	  {
+		if(notifications[i] == user)
+		{
+			return;
+		}
+	  }
+	  
+	  notifications.push(user);
+	  renderNotification();
+	  
+  }
+  
+  var removeNotification = function (user) {
+	var index = notifications.indexOf(user);
+	if(index > -1)
+	{
+		notifications.splice(index,1);	
+	}
+	
+	renderNotification();
+	  
+  }
+  
+  var renderNotification = function()
+  {
+	  document.getElementById("noteBox").innerHTML = "";
+	  
+	  for(var i = 0;i< notifications.length;i++)
+	  {  
+	  	  if(notifications[i] == "main")
+		  {
+			  var newp = document.createElement("p");
+			  var newc = document.createTextNode("Main Chat (!)");
+			  newp.appendChild(newc);
+			  newp.setAttribute("onclick", "switchChatContext(\"\")");
+			  document.getElementById("noteBox").appendChild(newp);
+		  }
+		  else
+		  {
+			  var newp = document.createElement("p");
+			  var newc = document.createTextNode(notifications[i] + " (!)");
+			  newp.appendChild(newc);
+			  newp.className = newusers[notifications[i]].userColorClass;
+			  newp.setAttribute("onclick", "switchChatContext(\"" + notifications[i] + "\")" );
+			  document.getElementById("noteBox").appendChild(newp);
+		  }
+	  }
+	  
+	  
   }
   
   if(this.MozWebSocket)
@@ -403,19 +507,14 @@
     <tr>
       <th height="5%" colspan="2" scope="col"> <div id="chatHead">
           <p id="uidCont"> CHAT HEAD </p>
+          <p id="targetCont"> </p>
           <input type="button" name="Logout" value="Log Out" onclick="handleLogout()"/>
         </div>
       </th>
     </tr>
     <tr>
-      <td width="75%"><div id="messageBox"> </div></td>
-      <td width="25%" height="85%"><div id="userBox">
-          <p class="mainChatLink" id="mainChatLink" onclick="switchChatContext()">Main Chat</p>
-          <p class="userColor01" onclick="switchChatContext(&quot;SampleUser1&quot;)">SampleUser1</p>
-          <p class="userColor02" onclick="switchChatContext(&quot;SampleUser2&quot;)">SampleUser2</p>
-          <p class="userColor03" onclick="switchChatContext(&quot;SampleUser3&quot;)">SampleUser3</p>
-          <p> USERS BOX </p>
-        </div></td>
+      <td width="75%" height="85%"><div id="messageBox"> </div></td>
+      <td width="25%" height="85%"><div id="userBox"> </div></td>
     </tr>
     <tr>
       <td height="20%"><div id="typeBox">
@@ -425,35 +524,9 @@
             <input name="Send Message" type="button" value="Send Message" onclick="sendMessage()" />
           </form>
         </div></td>
-      <td height="20%"><div id="noteBox">
-      		TODO: PUT NOTIFICATIONS HERE
-      </div>
-      </td>
+      <td height="20%"><div id="noteBox"></div></td>
     </tr>
   </table>
 </div>
-<div id="privBox">
-  <div id="chat_mario">
-  <table width="10%" border="1">
-    <tr>
-      <td class="privHead">Private Chat with Mario</td>
-    </tr>
-    <tr>
-      <td class="privBody">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="privSend">
-      	<form>
-          <input name="PrivMsg" type="text" />
-          <input name="PrivSend" type="button" value="Send Message" />
-        </form>
-      </td>
-    </tr>
-  </table>
-  
-  </div>
-
-</div>
-
 </body>
 </html>
