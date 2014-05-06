@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -8,16 +8,35 @@
 {
     height: 100%;
 }*/
-#head p {
+p
+{
+    margin: 0;
+}
+#authenticationBox table 
+{
+    width: 100%;
+    border: 1px solid black;
+}
+#authenticationBox table th,td
+{
+    border: 1px solid black;
+}
+h1 {
 	font-weight: bold;
 	font-variant: normal;
 	font-size: 18px;
+	margin: 0;
+	text-align:center;
 }
 #container {
 	border: thin solid #000;
 	position: absolute;
 	height: 90%;
-	width: 90%;
+	width: 95%;
+}
+#authenticationBox 
+{
+    text-align: center;
 }
 #container #chatTable tr td #typeBox form textarea {
 	width: 95%;
@@ -32,17 +51,24 @@
 #chatTable td {
 	border: 1px solid black;
 }
-#privBox #chat_mario {
-}
-#privBox {
-	top: 1000px;
-	overflow: scroll;
-	position: relative;
-	bottom: 0px;
-}
-#messageBox {
+#messageBox, #userBox, noteBox {
 	height:100%;
 	overflow:scroll;
+	font-family: Monospace;
+}
+
+#messageBoxCell 
+{
+    width: 75%;
+    height: 85%;
+}
+#userBoxCell
+{
+    width: 25%;
+}
+#chatTable th
+{
+    height: 5%;
 }
 .userColor01 {
 	color: #006600;
@@ -57,7 +83,7 @@
 	color: #00FF00;
 }
 .userColor05 {
-	color: #33CCFF;
+    color: #33CCFF;
 }
 .userColor06 {
 	color: #666600;
@@ -117,56 +143,56 @@
 	console.log(s);
   }
   log.buffer = [];
-  
-  var handleLogin = function()
-  {
-	  //Login Reads the authentication info, validates, and connects to the chatserver
-	  console.log("TESTING LOGIN FUNCTIONALITY");
-	  
-	  var urlbox = document.getElementById("urlAuth");
-	  url = urlbox.value;
-	  var uidbox = document.getElementById("uidAuth");
-	  uid = uidbox.value;
-	  
-	  sock = new WebSocket(url);
-	  sock.onopen = function()
-  	  {
-	    // ON SOCKET OPEN: log connection establishment
-	    a = new Date();
-	    log("" + a.toLocaleString() + ": CONNECTION ESTABLISHED"); 
-		
-		sock.send("ME IS " + uid);
-		
-		sock.send("WHO HERE");
-	    setInterval(function()
-	  	{
-			sock.send("WHO HERE");
-		}, 10000);
-	    
-  	  }
-  
-  	  sock.onclose = function( e )
-      {
-	    a = new Date();
-	    log("" + a.toLocaleString() + ": CONNECTION TERMINATED");  
+
+  var handleLogin = function () {
+      //Login Reads the authentication info, validates, and connects to the chatserver
+      console.log("TESTING LOGIN FUNCTIONALITY");
+
+      var urlbox = document.getElementById("urlAuth");
+      url = urlbox.value;
+      var uidbox = document.getElementById("uidAuth");
+      uid = uidbox.value;
+
+      if (uid.search(" ") >= 0) {
+          alert("No spaces in usernames, please!");
+          uidbox.value = "";
+          return;
       }
-  
-  	  sock.onerror = function( e )
-      {
-	    a = new Date();
-	    log("" + a.toLocaleString() + ": ERROR DETECTED: \n" + e.toString());
+
+      sock = new WebSocket(url);
+      sock.onopen = function () {
+          // ON SOCKET OPEN: log connection establishment
+          a = new Date();
+          log("" + a.toLocaleString() + ": CONNECTION ESTABLISHED");
+
+          sock.send("ME IS " + uid);
+
+          sock.send("WHO HERE");
+          setInterval(function () {
+              sock.send("WHO HERE");
+          }, 10000);
+
       }
-  
-      sock.onmessage = function( e )
-      {
-	    a = new Date();
-	    msg = e.data.toString()
-	    log("" + a.toLocaleString() + ": MSG RECEIVED: \n" + msg);
-	    parseAndHandle( msg );
+
+      sock.onclose = function (e) {
+          a = new Date();
+          log("" + a.toLocaleString() + ": CONNECTION TERMINATED");
       }
-	  
-	  //Ping the Server with a ME IS request
-	  
+
+      sock.onerror = function (e) {
+          a = new Date();
+          log("" + a.toLocaleString() + ": ERROR DETECTED: \n" + e.toString());
+      }
+
+      sock.onmessage = function (e) {
+          a = new Date();
+          msg = e.data.toString()
+          log("" + a.toLocaleString() + ": MSG RECEIVED: \n" + msg);
+          parseAndHandle(msg);
+      }
+
+      //Ping the Server with a ME IS request
+
 
   }
 
@@ -481,21 +507,19 @@
 </script>
 </head>
 <body>
-<div id="head" align="center">
-  <p> Welcome to WillxWill chat client! </p>
-</div>
+<h1> Welcome to WillxWill chat client!</h1>
 <div id="container">
-  <div id="authenticationBox" align="center">
-    <p> AUTH GOES HERE </p>
+  <div id="authenticationBox">
+    <!--<p> AUTH GOES HERE </p>-->
     <form id="authForm">
-      <table width="100%" border="1">
+      <table>
         <tr>
           <td>Please Enter the URL of the Chat Server:</td>
           <td><input name="input" type="text" value="ws://173.68.177.154:8787/chat" size="35" maxlength="50" id="urlAuth" /></td>
         </tr>
         <tr>
           <td>Please Select a User Name:</td>
-          <td><input name="" type="text" value="LadyGaga" size="35" maxlength="25" id="uidAuth" /></td>
+          <td><input name="" type="text" value="" size="35" maxlength="25" id="uidAuth" /></td>
         </tr>
         <tr>
           <td colspan="2"><input name="Login" type="button" value="Log In" onclick="handleLogin()"/></td>
@@ -505,7 +529,7 @@
   </div>
   <table id="chatTable">
     <tr>
-      <th height="5%" colspan="2" scope="col"> <div id="chatHead">
+      <th colspan="2" scope="col"> <div id="chatHead">
           <p id="uidCont"> CHAT HEAD </p>
           <p id="targetCont"> </p>
           <input type="button" name="Logout" value="Log Out" onclick="handleLogout()"/>
@@ -513,18 +537,17 @@
       </th>
     </tr>
     <tr>
-      <td width="75%" height="85%"><div id="messageBox"> </div></td>
-      <td width="25%" height="85%"><div id="userBox"> </div></td>
+      <td id="messageBoxCell"><div id="messageBox"> </div></td>
+      <td id="userBoxCell"><div id="userBox"> </div></td>
     </tr>
     <tr>
-      <td height="20%"><div id="typeBox">
-          <form action="" method="get">
-            <input type="file" />
+      <td><div id="typeBox">
+          <form method="get">
             <textarea id="mainChatTextBox" rows="5" cols = "50"></textarea>
             <input name="Send Message" type="button" value="Send Message" onclick="sendMessage()" />
           </form>
         </div></td>
-      <td height="20%"><div id="noteBox"></div></td>
+      <td><div id="noteBox"></div></td>
     </tr>
   </table>
 </div>
