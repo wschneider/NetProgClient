@@ -269,7 +269,7 @@ h1 {
       if (activeChat == "") {
           // The main broadcast chat is currently open. Do not add alert, just display in the chat div and add the message to the main chat string too.
 		  
-		  var chatdisplayline = "<p><span class=\"" + users[fromuid].colorClass +
+		  var chatdisplayline = "<p><span " + "onclick=switchChatContext(\"" + fromuid +"\")" + " class=\"" + users[fromuid].colorClass +
               "\">" + fromuid + ": </span>" + restmsg + "</p>";
 			  
 	      mainChatContents += chatdisplayline;
@@ -284,7 +284,7 @@ h1 {
           mainChatLink = document.getElementById("mainChatLink");
           //userBox.innerHTML = "Main Chat (!)";
           // TODO: Then add the message contents to the saved main chat.
-		  var chatdisplayline = "<p><span class=\"" + users[fromuid].colorClass +
+		  var chatdisplayline = "<p><span " + "onclick=switchChatContext(" + fromuid +")" + " class=\"" + users[fromuid].colorClass +
               "\">" + fromuid + ": </span>" + restmsg + "</p>";
 			  
 		  mainChatContents += chatdisplayline;
